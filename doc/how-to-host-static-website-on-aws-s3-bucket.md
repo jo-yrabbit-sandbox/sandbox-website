@@ -1,4 +1,7 @@
-## How to set up a website hosted on AWS
+## How to create a static website
+* Simple website that shows PGP public key, gives users option to download the public key file
+* Hosted on AWS s3 server
+* Deployment automated using Github Actions
 
 ### Set up repo
 
@@ -27,7 +30,7 @@ git push -u origin main
 ```
 
 
-### Create content
+### Create website content
 
 It can be anything.
 1. Create `index.html` with webpage content. It can be anything. Below is an example which shows your PGP public key as text
@@ -93,25 +96,26 @@ It can be anything.
 </html>
 ```
 
-2. If you don't have your public key handy, create a new PGP key pair, then copy the public key into the placeholder in `index.html`
+2. If you don't have your PGP public key handy, create a new PGP key pair, then copy the public key into the placeholder in `index.html`
 ```sh
 gpg --full-generate-key
 gpg --armor --export your.email@example.com > pubkey.asc
-cat pubkey.asc  # Copy this into `index.html`
+cat pubkey.asc  # Copy this into the placeholder inside `index.html`
 ```
 
-3. Place both `index.html` and `pubkey.asc` in your repo
+3. Save both `index.html` and `pubkey.asc` in top-level folder of your repo
 
 
 ### Set up deployment
 
-This isn't the most secure, but it is simple.
-#### Get secrets
-1. Create IAM root account and log in to AWS Console
+This isn't the most secure method, but it gets the job done.
+
+#### Generate your secrets
+1. Create IAM root account (requires credit card, free during trial period). Log in to AWS Console
 2. Click on your username in the top right
 3. Click "Security credentials"
 4. Under "Access keys", click "Create access key"
-5. AWS will show you both the Access Key ID and Secret Access Key. Save these, because this is the only time AWS will show you the Secret Access Key!
+5. AWS will show you both the `Access Key ID` and `Secret Access Key`. Save them both, because this is the only time AWS will show you the Secret Access Key!
 
 #### Setup AWS CLI
 1. Download and install AWS CLI
@@ -125,14 +129,14 @@ This isn't the most secure, but it is simple.
 1. Go to S3 in AWS Console
 2. Click "Create bucket"
 3. Choose a bucket name (here, sandbox-website-bucket)
-4. Choose your region
+4. Choose your region (e.g. us-east-2)
 5. Uncheck "Block all public access" (since it's a public website)
 6. Enable static website hosting:
 * Go to bucket > Properties
 * Scroll to "Static website hosting"
 * Click "Edit"
 * "Enable" it and set `index.html` as your index document
-7. Set your bucket policy to the following (or else you will get 403 AccessDenited error)
+7. Set your bucket policy to the following (don't forget, or else you will get 403 AccessDenited error)
 ```json
 {
     "Version": "2012-10-17",
@@ -149,7 +153,7 @@ This isn't the most secure, but it is simple.
 ```
 8. Note the URL for your website. It should be something like `http://<bucket-name>.s3-website.<your-region>.amazonaws.com/`
 
-#### Create an IAM policy for the deployment to your new bucket
+#### Create an IAM policy for doing the deployment
 1. Go to IAM in AWS Console and create a new policy
 ```json
 {
@@ -194,7 +198,6 @@ aws iam create-access-key --user-name github-actions-deployer
   * Name: AWS_SECRET_ACCESS_KEY
   * Value: `SecretAccessKey` from previous step
 
-
 6. Create a workflow file in your repo: `.github/workflows/deploy.yml`
 ```yaml
 name: Deploy to AWS
@@ -231,7 +234,8 @@ git commit -m "Initial commit"
 git push -u origin main
 ```
 
-3. The commit should trigger a Github Action to deploy `index.html` to s3 bucket
-* Go to `Actions` tab to see job status and errors if any
+3. The commit should trigger a Github Action to deploy `index.html` to s3 bucket. Go to Github and click the `Actions` tab to see job status and errors if any
 
-4. Navigate to browser and paste URL from previous step. For this example, [http://sandbox-website-bucket.s3-website.us-east-2.amazonaws.com](http://sandbox-website-bucket.s3-website.us-east-2.amazonaws.com)
+4. In your browser, navigate to the URL you noted previously. For this example: [http://sandbox-website-bucket.s3-website.us-east-2.amazonaws.com](http://sandbox-website-bucket.s3-website.us-east-2.amazonaws.com)
+
+![pgp-website](pgp-website.png)
