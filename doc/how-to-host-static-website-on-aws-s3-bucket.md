@@ -26,6 +26,8 @@ echo "*.env" >> .gitignore
 ```sh
 git remote add origin https://github.com/YOUR-USERNAME/sandbox-website.git
 git branch -M main
+git add .gitignore
+git commit -m "Initial commit of .gitignore"
 git push -u origin main
 ```
 
