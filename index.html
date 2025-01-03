@@ -43,6 +43,67 @@
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>API Data Display</h1>
+        <div id="apiData">Loading...</div>
+        <button onclick="fetchData()">Refresh Data</button>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/v1/messages/latest?state=test_state'; // Change this port number to match your API
+
+        async function fetchData() {
+            const dataDiv = document.getElementById('apiData');
+            dataDiv.className = '';
+            dataDiv.textContent = 'Loading...';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const rawData = await response.json();
+
+                try {
+                    // Handle the nested JSON string
+                    const messageObj = rawData.message;
+                    const fixedJson = messageObj.replace(/'/g, '"');
+                    const parsedData = JSON.parse(fixedJson);
+
+                    dataDiv.textContent =
+                        `Bot ID: ${parsedData.bot_id}\n` +
+                        `State: ${parsedData.state}\n` +
+                        `Text: ${parsedData.text}\n` +
+                        `Timestamp: ${parsedData.timestamp}`;
+                } catch (parseError) {
+                    console.error('Parse error:', parseError);
+                    dataDiv.textContent = rawData.message;
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                dataDiv.className = 'error';
+                if (error.message.includes('CORS')) {
+                    dataDiv.textContent =
+                        'CORS Error: Cannot connect to API server.\n\n' +
+                        'To fix this:\n' +
+                        '1. Make sure your API server is running on port 5000\n' +
+                        '2. Enable CORS on your API server\n' +
+                        '3. Try using a local server instead of opening the HTML file directly\n\n' +
+                        'Technical error: ' + error.message;
+                } else {
+                    dataDiv.textContent = 'Error fetching data: ' + error.message;
+                }
+            }
+        }
+
+        // Fetch data when page loads
+        fetchData();
+    </script>
+
     <div class="key-container">
         <h1>My PGP Public Key</h1>
         <p>You can use this public key to send me encrypted messages or verify signatures.</p>
