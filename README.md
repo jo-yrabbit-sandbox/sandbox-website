@@ -1,40 +1,36 @@
 # Sandbox website
 
 My website: http://sandbox-website-bucket.s3-website.us-east-2.amazonaws.com/
-* displays my PGP public key
+* Displays my PGP public key
+* Lets you download it
+* Fetches messages from `api-server`
 
-WIP: Integration with `api-server`
-* Prerequisite
-  * Make sure `api-server` is running (Does this return string: `http://localhost:5000/api/v1/messages/latest?state=test_state`)
+## How-to run locally for debugging purposes
+Assumes your `api-server` is locally hosted at `localhost:5000`
+
 * Host website locally
   * `python -m http.server 8000`
   * Navigate to [http://localhost:8000/](http://localhost:8000/)
 * Click `Refresh Data` to
-  * display response from [api-server](https://github.com/jo-yrabbit/sandbox-api-server)
-  * currently just dumps json content returned by: `http://localhost:5000/api/v1/messages/latest?state=test_state`
+  * Display response from [api-server](https://github.com/jo-yrabbit-sandbox/sandbox-api-server)
+  * Currently dumps json content returned by `http://localhost:5000/api/v1/messages/latest?state=test_state`
 
-## Setup
-1. Clone the repository
-2. Add PGP key to index.html
-3. Deploy to AWS S3
-
-## Things I'm learning
+## Things I want to add/learn/do
+Ordered by priority
+* Convert this into React (currently html)
+  * Take inputs from environment variables, arguments
+* Authentication/CORS on server
 * Display things:
-  * Display PGP key
-  * --Display images from an image bank in repo--
-* Deployed to AWS using Github Action
+  * Display text on trigger (user button press)
+  * Display images from an image bank within the repo (or from a separate server?)
+* Features:
+  * Refresh text content at configurable rate
+    * Input content updates at a higher frequency than website
 
-## Things I want short-term
-* Robust way to show content which updates at a higher frequency
-  * Prioritize separating dependency between back-/front-end configurations (refresh rates of input/website are independent)
-  * Input can be anything at this time, keep it abstract (timestamp/clock that refreshes 1s)
-  * Display should take latest snapshot at lower frequency (every 5s) and allow jittering
-  * Jittering to prevent race condition betweeen input/display fetching
-
-## Things I want long-pole
-* Interact with basic activity in a Telegram group
+### Things I want long-pole
+* Respond to chat message exchanges/activity in a Telegram group
 * Triggers from TG to Website:
-  * Display last #postme
-  * Tally Y/N responses
-* Triggered from Website to TG:
-  * Display input text
+  * Display last stored message
+  * Tally Y/N responses (need memory of some sort)
+* Can we trigger TG reactions from the website too?
+  * Display input text as TG message
